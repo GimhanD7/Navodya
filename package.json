@@ -1,0 +1,8 @@
+{
+  "name": "smart-generator-monitoring",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {"start": "node --env-file=.env server.js", "test": "node --test"},
+  "dependencies": {"express": "^5.1.0", "mysql2": "^3.14.0", "express-session": "^1.18.1", "bcryptjs": "^3.0.2", "helmet": "^8.1.0", "express-rate-limit": "^8.0.0", "dotenv": "^17.0.0"}
+}
