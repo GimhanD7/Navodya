@@ -1,10 +1,10 @@
-export async function request(url, options = {}) {
-  const response = await fetch(url, {
+export const api = async (url, opt = {}) => {
+  const r = await fetch(url, {
     credentials: "include",
-    ...options,
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: { "Content-Type": "application/json", ...(opt.headers || {}) },
+    ...opt,
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || "Something went wrong");
-  return data;
-}
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw Error(d.error || "Something went wrong");
+  return d;
+};

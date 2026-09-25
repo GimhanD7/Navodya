@@ -1,0 +1,5 @@
+.panel{box-shadow:0 4px 18px rgba(16,42,51,.045);transition:box-shadow .18s ease,transform .18s ease}.panel:hover{box-shadow:0 8px 24px rgba(16,42,51,.075)}
+.button{box-shadow:0 2px 5px rgba(18,107,84,.15);transition:background .18s ease,box-shadow .18s ease,transform .18s ease}.button:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(18,107,84,.2)}.button.secondary{box-shadow:none}
+.table-wrap table tr:hover td{background:#fbfdfd}.table-wrap td:last-child{white-space:nowrap}.table-wrap .button{padding:7px 10px;font-size:.75rem}.config-card .form-actions{border-top:1px solid #edf1f3;padding-top:16px}.config-message{color:var(--green)}
+.login-form{padding:34px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 16px 45px rgba(16,42,51,.08)}
+@media(max-width:760px){.login-form{padding:26px 20px;box-shadow:0 10px 28px rgba(16,42,51,.06)}.panel:hover{transform:none}}
