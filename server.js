@@ -1,9 +1,9 @@
 import express from 'express';
 import helmet from 'helmet';
-import session from 'express-session';
 import rateLimit from 'express-rate-limit';
 import bcrypt from 'bcryptjs';
 import mysql from 'mysql2/promise';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defaults } from './lib/status.js';
@@ -25,11 +25,14 @@ const databaseConfig={
   connectTimeout:10000,
 };
 const pool=mysql.createPool(databaseConfig);
-app.use(helmet({contentSecurityPolicy:false})); app.use(express.json()); app.use(express.urlencoded({extended:false})); app.use(session({secret:process.env.SESSION_SECRET||'change-me',resave:false,saveUninitialized:false,cookie:{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:8*60*60*1000}}));
+const sessionSecret='navodya-session-7f2d4c9a1b6e8d3f0c5a9e2b7d4f6a8c1e3b5d7f9a2c4e6b8d0f1a3c5e7b9';
+const signSession=value=>crypto.createHmac('sha256',sessionSecret).update(value).digest('base64url');
+const readSession=req=>{const raw=req.headers.cookie?.match(/(?:^|;\s*)navodya_session=([^;]+)/)?.[1];if(!raw)return null;const [payload,signature]=decodeURIComponent(raw).split('.');if(!payload||!signature)return null;const expected=signSession(payload);if(signature.length!==expected.length||!crypto.timingSafeEqual(Buffer.from(signature),Buffer.from(expected)))return null;try{return JSON.parse(Buffer.from(payload,'base64url').toString())}catch{return null}};
+app.use(helmet({contentSecurityPolicy:false})); app.use(express.json()); app.use(express.urlencoded({extended:false})); app.use((req,res,next)=>{req.session={user:readSession(req)};next()});
 app.use(rateLimit({windowMs:15*60*1000,limit:120,standardHeaders:true,legacyHeaders:false,skip:req=>req.method==='GET'}));
 const auth=(req,res,next)=>req.session.user?next():res.status(401).json({error:'Authentication required'});
-app.post('/api/login',async(req,res)=>{try{const identifier=String(req.body.username||'').trim(); const password=String(req.body.password||''); if(!identifier||!password)return res.status(400).json({error:'Enter username and password.'}); const [rows]=await pool.query('SELECT user_id,name,email,password_hash,role FROM users WHERE email=? OR name=? LIMIT 1',[identifier,identifier]); const user=rows[0]; if(!user||!await bcrypt.compare(password,user.password_hash))return res.status(401).json({error:'Invalid username or password.'}); req.session.user={id:user.user_id,name:user.name,email:user.email,role:user.role}; res.json({user:req.session.user});}catch(e){console.error('Login failed', {code:e.code||'UNKNOWN',errno:e.errno,sqlState:e.sqlState});res.status(503).json({error:'Database unavailable. Check the server connection.'})}});
-app.post('/api/logout',(req,res)=>req.session.destroy(()=>res.json({ok:true}))); app.get('/api/session',(req,res)=>res.json({user:req.session.user||null}));
+app.post('/api/login',async(req,res)=>{try{const identifier=String(req.body.username||'').trim(); const password=String(req.body.password||''); if(!identifier||!password)return res.status(400).json({error:'Enter username and password.'}); const [rows]=await pool.query('SELECT user_id,name,email,password_hash,role FROM users WHERE email=? OR name=? LIMIT 1',[identifier,identifier]); const user=rows[0]; if(!user||!await bcrypt.compare(password,user.password_hash))return res.status(401).json({error:'Invalid username or password.'}); const sessionUser={id:user.user_id,name:user.name,email:user.email,role:user.role}; const payload=Buffer.from(JSON.stringify(sessionUser)).toString('base64url'); res.setHeader('Set-Cookie',`navodya_session=${payload}.${signSession(payload)}; Max-Age=28800; Path=/; HttpOnly; SameSite=Lax; Secure`); res.json({user:sessionUser});}catch(e){console.error('Login failed', {code:e.code||'UNKNOWN',errno:e.errno,sqlState:e.sqlState});res.status(503).json({error:'Database unavailable. Check the server connection.'})}});
+app.post('/api/logout',(req,res)=>{res.setHeader('Set-Cookie','navodya_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax; Secure');res.json({ok:true})}); app.get('/api/session',(req,res)=>res.json({user:req.session||null}));
 app.get('/api/config',auth,async(req,res)=>{try{const [rows]=await pool.query('SELECT parameter,warning_min,warning_max,critical_min,critical_max,enabled FROM maintenance_config WHERE enabled=1'); res.json({rows,defaults});}catch(e){res.status(503).json({error:'Configuration unavailable.'})}});
 app.put('/api/config',auth,async(req,res)=>{if(req.session.user.role!=='admin')return res.status(403).json({error:'Only administrators can change thresholds.'});try{const {parameter,warning_min,warning_max,critical_min,critical_max}=req.body;if(!['temperature','voltage','frequency','fuel'].includes(parameter))return res.status(400).json({error:'Invalid parameter.'});await pool.query('UPDATE maintenance_config SET warning_min=?,warning_max=?,critical_min=?,critical_max=?,enabled=1,updated_at=NOW() WHERE parameter=?',[warning_min||null,warning_max||null,critical_min||null,critical_max||null,parameter]);res.json({ok:true});}catch(e){res.status(503).json({error:'Unable to save configuration.'})}});
 app.get('/api/generators',auth,async(req,res)=>{try{const [rows]=await pool.query('SELECT generator_id,name,serial_no,location,rated_capacity_kva,install_date FROM generators ORDER BY name');res.json({rows,telemetryAvailable:false});}catch(e){res.status(503).json({error:'Generators unavailable.'})}});
