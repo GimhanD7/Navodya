@@ -34,12 +34,12 @@ hours must not be confused.
 
 ## Central configuration defaults from the brief
 
-| Parameter | Warning | Critical |
-| --- | --- | --- |
-| Temperature | 85 °C | 95 °C |
-| Voltage | Outside 210–250 V | Outside 190–260 V |
-| Frequency | Outside 49–51 Hz | Outside 47–53 Hz |
-| Fuel | 20% | 10% |
+| Parameter   | Warning           | Critical          |
+| ----------- | ----------------- | ----------------- |
+| Temperature | 85 °C             | 95 °C             |
+| Voltage     | Outside 210–250 V | Outside 190–260 V |
+| Frequency   | Outside 49–51 Hz  | Outside 47–53 Hz  |
+| Fuel        | 20%               | 10%               |
 
 Oil service interval: 250 hours.
 

@@ -1,15 +1,44 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Generator monitoring, maintenance, and administration.">
-  <title>Generator System</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d232c'/%3E%3Cpath d='M18 4 8 18h7l-1 10 10-15h-7z' fill='%2359e0aa'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/styles.css"><script type="module" src="/app.js"></script>
-</head>
-<body>
-  <div id="app"></div>
-  <dialog id="modal"><form id="modal-form"><div class="dialog-header"><h2 id="modal-title"></h2><button type="button" class="icon-button" id="close-modal" aria-label="Close dialog">×</button></div><div id="modal-fields"></div><p id="modal-error" class="error" role="alert"></p><div class="dialog-footer"><button type="button" class="button secondary" id="cancel-modal">Cancel</button><button type="submit" class="button">Add</button></div></form></dialog>
-  <div id="toast" role="status" aria-live="polite"></div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Generator monitoring, maintenance, and administration."
+    />
+    <title>Generator System</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d232c'/%3E%3Cpath d='M18 4 8 18h7l-1 10 10-15h-7z' fill='%2359e0aa'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <dialog id="modal">
+      <form id="modal-form">
+        <div class="dialog-header">
+          <h2 id="modal-title"></h2>
+          <button
+            type="button"
+            class="icon-button"
+            id="close-modal"
+            aria-label="Close dialog"
+          >
+            ×
+          </button>
+        </div>
+        <div id="modal-fields"></div>
+        <p id="modal-error" class="error" role="alert"></p>
+        <div class="dialog-footer">
+          <button type="button" class="button secondary" id="cancel-modal">
+            Cancel</button
+          ><button type="submit" class="button">Add</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
 </html>
