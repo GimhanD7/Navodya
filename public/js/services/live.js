@@ -1,3 +1,4 @@
+import { loadData } from "./data.js";
 import { updateDemo } from "./demo.js";
 import { api } from "../api.js";
 import { state } from "../state.js";
@@ -36,13 +37,14 @@ export function startLiveUpdates(refresh, render) {
     const user = state.user;
     const selected = state.selected;
     try {
+      if (state.generatorError || !state.selected) { await loadData(); if (state.user === user) refresh(); return; }
       const [notifications, reading] = await Promise.allSettled([
         api("/api/notifications"),
         selected ? api("/api/generators/" + selected + "/latest") : Promise.resolve({ reading: null }),
       ]);
       if (state.user !== user) return;
       if (notifications.status === "fulfilled") syncNotifications(notifications.value.rows || [], render);
-      state.liveError = reading.status === "rejected" ? "Connection interrupted — retrying…" : "";
+      if (selected === state.selected) state.telemetryError = reading.status === "rejected" ? reading.reason : null;
       if (selected === state.selected && reading.status === "fulfilled") state.reading = reading.value.reading;
       refresh();
     } finally { busy = false; }

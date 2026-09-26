@@ -2,6 +2,7 @@ import express from "express";
 import { pool } from "../lib/db.js";
 import { auth } from "../lib/auth.js";
 import { defaults, parameterStatus } from "../lib/status.js";
+import { databaseError } from "../lib/database-error.js";
 
 const router = express.Router();
 
@@ -12,19 +13,19 @@ router.get("/api/generators", auth, async (req, res) => {
     );
     res.json({ rows, telemetryAvailable: false });
   } catch (e) {
-    res.status(503).json({ error: "Generators unavailable." });
+    res.status(503).json(databaseError(e));
   }
 });
 router.get("/api/generators/:id/latest", auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT status,voltage,current,frequency,temperature,fuel_level,runtime_seconds,recorded_at FROM generator_readings WHERE generator_id=? ORDER BY recorded_at DESC LIMIT 1",
+      "SELECT status,voltage,current,frequency,temperature,fuel_level,runtime_seconds,recorded_at,TIMESTAMPDIFF(SECOND,recorded_at,NOW()) AS age_seconds FROM generator_readings WHERE generator_id=? ORDER BY recorded_at DESC LIMIT 1",
       [req.params.id],
     );
     res.json({ reading: rows[0] || null });
   } catch (e) {
     console.error("Latest telemetry query failed", { code: e.code || "UNKNOWN" });
-    res.status(503).json({ error: "Telemetry unavailable." });
+    res.status(503).json(databaseError(e));
   }
 });
 router.post("/api/generators", auth, async (req, res) => {
