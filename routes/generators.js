@@ -18,7 +18,7 @@ router.get("/api/generators", auth, async (req, res) => {
 router.get("/api/generators/:id/latest", auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT status,voltage,current,frequency,temperature,fuel_level,runtime_seconds,recorded_at FROM generator_readings WHERE generator_id=? ORDER BY recorded_at DESC LIMIT 1",
+      "SELECT status,voltage,current,frequency,temperature,fuel_level,runtime_seconds,source,recorded_at FROM generator_readings WHERE generator_id=? ORDER BY recorded_at DESC LIMIT 1",
       [req.params.id],
     );
     res.json({ reading: rows[0] || null });
@@ -93,7 +93,7 @@ router.post("/api/generators/:id/readings", auth, async (req, res) => {
     const limits = { ...defaults };
     for (const x of cfg) {
       if (x.parameter === "temperature") {
-        limits.temperatureWarning = Number(x.warning_min);
+        limits.temperatureWarning = Number(x.warning_max);
         limits.temperatureCritical = Number(x.critical_max);
       }
       if (x.parameter === "fuel") {

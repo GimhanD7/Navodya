@@ -3,3 +3,17 @@
 .table-wrap table tr:hover td{background:#fbfdfd}.table-wrap td:last-child{white-space:nowrap}.table-wrap .button{padding:7px 10px;font-size:.75rem}.config-card .form-actions{border-top:1px solid #edf1f3;padding-top:16px}.config-message{color:var(--green)}
 .login-form{padding:34px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 16px 45px rgba(16,42,51,.08)}
 @media(max-width:760px){.login-form{padding:26px 20px;box-shadow:0 10px 28px rgba(16,42,51,.06)}.panel:hover{transform:none}}
+
+/* Live notification popups */
+#toast-region { position: fixed; right: 24px; bottom: 24px; z-index: 1000; width: min(380px, calc(100vw - 32px)); display: grid; gap: 12px; }
+.notification-toast { position: relative; background: #102f2b; color: #fff; border-left: 4px solid #f2bd52; border-radius: 12px; padding: 20px 42px 18px 20px; box-shadow: 0 12px 40px #001b2a40; animation: toast-enter .2s ease-out; }
+.notification-toast strong { display: block; font-size: 15px; }
+.notification-toast p { color: #d7e7e2; margin: 8px 0; font-size: 13px; line-height: 1.5; }
+.toast-close { position: absolute; right: 10px; top: 8px; color: white; background: transparent; border: 0; padding: 6px; font-size: 22px; cursor: pointer; }
+.toast-open { border: 0; background: transparent; color: #8df1c8; padding: 6px 0; cursor: pointer; font-weight: 600; }
+.notification-button { position: relative; }
+.notification-count { position: absolute; right: -5px; top: -5px; border-radius: 20px; background: #b54427; color: white; min-width: 18px; padding: 2px 4px; font-size: 10px; }
+.notification-count[hidden] { display: none; }
+.login-form > .secondary { margin-top: 12px; width: 100%; }
+@keyframes toast-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .notification-toast { animation: none; } }
