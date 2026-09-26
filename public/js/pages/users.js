@@ -1,13 +1,12 @@
 import { state } from "../state.js";
-import { icons, $$ } from "../icons.js";
+import { $, $$ } from "../icons.js";
 import { api } from "../api.js";
-import { render } from "../../app.js";
 
 export function users() {
   return `<div class="page-heading"><div><div class="eyebrow">Administration</div><h1>Users</h1><p>People who can manage or monitor generators.</p></div><button class="button" id="add-user">+ Add user</button></div><div class="panel table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>${state.users.length ? state.users.map((u) => `<tr><td class="table-name">${u.name}</td><td>${u.email}</td><td><span class="status normal">${u.role}</span></td><td><button class="button secondary user-edit" data-id="${u.user_id}">Edit</button> <button class="button secondary user-delete" data-id="${u.user_id}">Delete</button></td></tr>`).join("") : `<tr><td colspan="4" class="empty">No users available.</td></tr>`}</tbody></table></div>`;
 }
 
-export function bindUsers() {
+export function bindUsers(render) {
   $$(".user-edit").forEach(
     (b) =>
       (b.onclick = async () => {

@@ -1,3 +1,5 @@
+import { $$ } from "../icons.js";
+import { api } from "../api.js";
 import { state } from "../state.js";
 
 export function config() {
@@ -28,4 +30,28 @@ export function config() {
     ["Warning minimum", "warning_min"],
     ["Critical minimum", "critical_min"],
   ])}<div class="panel config-card"><h2>Oil service</h2><p class="range-description">Service interval is currently fixed at 250 runtime hours.</p><div class="metric-value">250 <span>hours</span></div></div></div>`;
+}
+
+export function bindConfiguration() {
+  $$(".config-form").forEach(
+    (form) =>
+      (form.onsubmit = async (e) => {
+        e.preventDefault();
+        const message = form.querySelector(".config-message");
+        try {
+          const body = Object.fromEntries(new FormData(form));
+          await api("/api/config", {
+            method: "PUT",
+            body: JSON.stringify({
+              parameter: form.dataset.parameter,
+              ...body,
+            }),
+          });
+          message.textContent = "Saved";
+          state.config = (await api("/api/config")).rows;
+        } catch (err) {
+          message.textContent = err.message;
+        }
+      }),
+  );
 }
