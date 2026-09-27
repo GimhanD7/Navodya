@@ -1199,3 +1199,6 @@ dialog::backdrop {
 .notification-toast p { margin: 0; font-size: 0.9em; }
 .toast-close { position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2em; cursor: pointer; color: var(--text-muted, #94a3b8); }
 .toast-open { margin-top: 8px; background: var(--primary, #3b82f6); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+/* Dashboard Sparklines */
+.sparkline { display: block; width: 100%; height: 30px; margin-top: 8px; margin-bottom: 4px; overflow: visible; }

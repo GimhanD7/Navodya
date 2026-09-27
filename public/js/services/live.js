@@ -45,7 +45,14 @@ export function startLiveUpdates(refresh, render) {
       if (state.user !== user) return;
       if (notifications.status === "fulfilled") syncNotifications(notifications.value.rows || [], render);
       if (selected === state.selected) state.telemetryError = reading.status === "rejected" ? reading.reason : null;
-      if (selected === state.selected && reading.status === "fulfilled") state.reading = reading.value.reading;
+      if (selected === state.selected && reading.status === "fulfilled") {
+        const newReading = reading.value.reading;
+        if (newReading && (!state.reading || state.reading.recorded_at !== newReading.recorded_at)) {
+          state.history.push(newReading);
+          if (state.history.length > 30) state.history.shift();
+        }
+        state.reading = newReading;
+      }
       refresh();
     } finally { busy = false; }
   }, 1000);

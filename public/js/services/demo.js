@@ -37,6 +37,8 @@ export function updateDemo(now = Date.now()) {
     fuel_level: phase === 2 ? 18 : 68,
     runtime_seconds: 154200 + elapsed,
   };
+  state.history.push(state.reading);
+  if (state.history.length > 30) state.history.shift();
   if (phase !== previousPhase) {
     for (const notification of state.notifications) notification.status = "resolved";
     if (phase === 1 || phase === 2) {

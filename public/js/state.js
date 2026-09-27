@@ -7,4 +7,5 @@ export const state = {
   config: [],
   selected: null,
   reading: null,
+  history: [],
 };
