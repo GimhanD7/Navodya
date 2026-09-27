@@ -13,12 +13,16 @@ const sparkline = (data, key) => {
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max === min ? 1 : max - min;
-  const padding = range * 0.1;
+  const padding = range * 0.2;
   const bottom = min - padding;
   const top = max + padding;
-  const w = 100, h = 30;
+  const w = 100, h = 40;
   const points = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - ((v - bottom) / (top - bottom)) * h}`).join(" ");
-  return `<svg viewBox="0 0 ${w} ${h}" class="sparkline" preserveAspectRatio="none"><polyline points="${points}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const fillPoints = `0,${h} ${points} ${w},${h}`;
+  return `<svg viewBox="0 0 ${w} ${h}" class="sparkline" preserveAspectRatio="none">
+    <polygon points="${fillPoints}" fill="var(--primary)" opacity="0.1" />
+    <polyline points="${points}" fill="none" stroke="var(--primary)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
 };
 
 export function dashboard() {
