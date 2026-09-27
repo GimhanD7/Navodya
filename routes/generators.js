@@ -19,7 +19,7 @@ router.get("/api/generators", auth, async (req, res) => {
 router.get("/api/generators/:id/latest", auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT status,voltage,current,frequency,temperature,fuel_level,runtime_seconds,recorded_at,TIMESTAMPDIFF(SECOND,recorded_at,NOW()) AS age_seconds FROM generator_readings WHERE generator_id=? ORDER BY recorded_at DESC LIMIT 1",
+      "SELECT status,voltage,current,frequency,temperature,fuel_level,runtime_seconds,recorded_at,source,TIMESTAMPDIFF(SECOND,recorded_at,NOW()) AS age_seconds FROM generator_readings WHERE generator_id=? ORDER BY recorded_at DESC LIMIT 1",
       [req.params.id],
     );
     res.json({ reading: rows[0] || null });

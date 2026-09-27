@@ -48,6 +48,6 @@ export function startLiveUpdates(refresh, render) {
       if (selected === state.selected && reading.status === "fulfilled") state.reading = reading.value.reading;
       refresh();
     } finally { busy = false; }
-  }, 2000);
+  }, 1000);
   return () => clearInterval(timer);
 }
