@@ -3,6 +3,13 @@ import { icons, $, $$ } from "../icons.js";
 import { state } from "../state.js";
 
 export function shell() {
+  const allowed =
+    state.user?.role === "admin"
+      ? ["dashboard", "users", "generators", "maintenance", "notifications", "configuration"]
+      : state.user?.role === "operator"
+        ? ["dashboard", "generators", "maintenance", "notifications"]
+        : ["dashboard", "maintenance", "notifications"];
+
   return `${state.demo ? '<div class="preview-banner" role="status">LIVE DEMO · Simulated generator readings and alerts · No device or database writes</div>' : ""}<div class="shell"><aside class="sidebar" id="sidebar"><div class="brand"><div class="brand-mark">${icons.bolt}</div><div>Generator System<small>Monitoring platform</small></div></div><div class="nav-caption">Workspace</div><nav class="nav">${[
     ["dashboard", "Dashboard", "grid"],
     ["users", "Users", "users"],
@@ -11,6 +18,7 @@ export function shell() {
     ["notifications", "Notifications", "bell"],
     ["configuration", "Configuration", "gear"],
   ]
+    .filter(([r]) => allowed.includes(r))
     .map(
       ([r, l, i]) =>
         `<a href="#${r}" class="${state.route === r ? "active" : ""}" data-route="${r}">${icons[i]}<span>${l}</span></a>`,
@@ -21,24 +29,7 @@ export function shell() {
 }
 
 export function bindShell(render) {
-  const allowed =
-    state.user?.role === "admin"
-      ? [
-          "dashboard",
-          "users",
-          "generators",
-          "maintenance",
-          "notifications",
-          "configuration",
-        ]
-      : state.user?.role === "operator"
-        ? ["dashboard", "generators", "maintenance", "notifications"]
-        : ["dashboard", "maintenance", "notifications"];
   $$(".nav a").forEach((a) => {
-    if (!allowed.includes(a.dataset.route)) {
-      a.remove();
-      return;
-    }
     a.onclick = (e) => {
       e.preventDefault();
       state.route = a.dataset.route;
