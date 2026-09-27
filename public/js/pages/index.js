@@ -4,6 +4,7 @@ import { generators } from "./generators.js";
 import { maintenance } from "./maintenance.js";
 import { notifications, bindNotifications } from "./notifications.js";
 import { config, bindConfiguration } from "./configuration.js";
+import { reports, bindReports } from "./reports.js";
 
 export const pages = {
   dashboard: { render: dashboard, bind: bindDashboard, update: updateDashboard },
@@ -12,4 +13,5 @@ export const pages = {
   maintenance: { render: maintenance },
   notifications: { render: notifications, bind: bindNotifications },
   configuration: { render: config, bind: bindConfiguration },
+  reports: { render: reports, bind: bindReports },
 };

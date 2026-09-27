@@ -20,7 +20,7 @@ export async function render() {
   
   const allowed =
     state.user?.role === "admin"
-      ? ["dashboard", "users", "generators", "maintenance", "notifications", "configuration"]
+      ? ["dashboard", "reports", "users", "generators", "maintenance", "notifications", "configuration"]
       : state.user?.role === "operator"
         ? ["dashboard", "generators", "maintenance", "notifications"]
         : ["dashboard", "maintenance", "notifications"];

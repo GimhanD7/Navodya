@@ -4,6 +4,7 @@ import configRoutes from "./config.js";
 import generatorsRoutes from "./generators.js";
 import notificationsRoutes from "./notifications.js";
 import usersRoutes from "./users.js";
+import reportsRoutes from "./reports.js";
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ router.use(configRoutes);
 router.use(generatorsRoutes);
 router.use(notificationsRoutes);
 router.use(usersRoutes);
+router.use(reportsRoutes);
 
 export default router;
