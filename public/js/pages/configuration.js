@@ -1,6 +1,7 @@
 import { $$ } from "../icons.js";
 import { api } from "../api.js";
 import { state } from "../state.js";
+import { showToast } from "../ui/toasts.js";
 
 export function config() {
   const cfg = Object.fromEntries(state.config.map((x) => [x.parameter, x]));
@@ -127,8 +128,12 @@ export function bindConfiguration() {
           
           state.config = (await api("/api/config")).rows;
         } catch (err) {
-          message.style.color = "var(--danger, #ef4444)";
-          message.textContent = err.message || "Failed to save configuration.";
+          message.textContent = "";
+          showToast({
+            title: "Validation Error",
+            detail: err.message || "Failed to save configuration.",
+            generator_name: "Configuration"
+          });
         }
       }),
   );
