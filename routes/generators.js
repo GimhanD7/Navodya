@@ -8,9 +8,13 @@ const router = express.Router();
 
 router.get("/api/generators", auth, async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      "SELECT generator_id,name,serial_no,location,rated_capacity_kva,install_date FROM generators ORDER BY name",
-    );
+    let query = "SELECT generator_id,name,serial_no,location,rated_capacity_kva,install_date FROM generators ORDER BY name";
+    let params = [];
+    if (req.session.user.role !== "admin") {
+      query = "SELECT g.generator_id,g.name,g.serial_no,g.location,g.rated_capacity_kva,g.install_date FROM generators g JOIN generator_users gu ON g.generator_id = gu.generator_id WHERE gu.user_id = ? ORDER BY g.name";
+      params = [req.session.user.id];
+    }
+    const [rows] = await pool.query(query, params);
     res.json({ rows, telemetryAvailable: false });
   } catch (e) {
     res.status(503).json(databaseError(e));

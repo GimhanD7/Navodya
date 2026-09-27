@@ -17,6 +17,18 @@ export async function render() {
   $("#content").innerHTML = '<div class="skeleton-message">Loading workspace…</div>';
   if (!state.demo) await loadData();
   syncNotifications(state.notifications, render);
+  
+  const allowed =
+    state.user?.role === "admin"
+      ? ["dashboard", "users", "generators", "maintenance", "notifications", "configuration"]
+      : state.user?.role === "operator"
+        ? ["dashboard", "generators", "maintenance", "notifications"]
+        : ["dashboard", "maintenance", "notifications"];
+
+  if (!allowed.includes(state.route)) {
+    state.route = "dashboard";
+  }
+
   const page = pages[state.route] || pages.dashboard;
   $("#content").innerHTML = page.render();
   bindShell(render);

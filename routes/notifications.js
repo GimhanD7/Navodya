@@ -6,9 +6,13 @@ const router = express.Router();
 
 router.get("/api/notifications", auth, async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      "SELECT n.notification_id,n.title,n.detail,n.status,n.created_at,g.name AS generator_name FROM notifications n JOIN generators g ON g.generator_id=n.generator_id ORDER BY n.created_at DESC LIMIT 100",
-    );
+    let query = "SELECT n.notification_id,n.title,n.detail,n.status,n.created_at,g.name AS generator_name FROM notifications n JOIN generators g ON g.generator_id=n.generator_id ORDER BY n.created_at DESC LIMIT 100";
+    let params = [];
+    if (req.session.user.role !== "admin") {
+      query = "SELECT n.notification_id,n.title,n.detail,n.status,n.created_at,g.name AS generator_name FROM notifications n JOIN generators g ON g.generator_id=n.generator_id JOIN generator_users gu ON g.generator_id=gu.generator_id WHERE gu.user_id=? ORDER BY n.created_at DESC LIMIT 100";
+      params = [req.session.user.id];
+    }
+    const [rows] = await pool.query(query, params);
     res.json({ rows });
   } catch (e) {
     res.status(503).json({ error: "Notifications unavailable." });
@@ -17,7 +21,11 @@ router.get("/api/notifications", auth, async (req, res) => {
 
 router.post("/api/notifications/resolve-all", auth, async (req, res) => {
   try {
-    await pool.query("UPDATE notifications SET status = 'resolved' WHERE status = 'active'");
+    if (req.session.user.role === "admin") {
+      await pool.query("UPDATE notifications SET status = 'resolved' WHERE status = 'active'");
+    } else {
+      await pool.query("UPDATE notifications n JOIN generator_users gu ON n.generator_id = gu.generator_id SET n.status = 'resolved' WHERE n.status = 'active' AND gu.user_id = ?", [req.session.user.id]);
+    }
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: "Failed to resolve notifications." });
