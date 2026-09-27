@@ -39,7 +39,11 @@ export function start() {
     const content = $("#content");
     if (!content || content.contains(document.activeElement)) return;
     const page = pages[state.route];
-    content.innerHTML = page.render();
-    page.bind?.(render);
+    if (page.update) {
+      page.update(render);
+    } else {
+      content.innerHTML = page.render();
+      page.bind?.(render);
+    }
   }, render);
 }
