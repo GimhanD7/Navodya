@@ -127,11 +127,19 @@ router.post("/api/generators/:id/readings", auth, async (req, res) => {
     ];
     for (const [title, key, value, label] of checks) {
       const status = parameterStatus(key, value, limits);
-      if (status === "warning" || status === "critical")
-        await pool.query(
-          "INSERT INTO notifications (generator_id,title,detail,status) VALUES (?,?,?,?)",
-          [req.params.id, title, `${label}: ${value} (${status})`, "active"],
+      if (status === "warning" || status === "critical") {
+        // Only insert if there isn't already an active notification for this issue
+        const [existing] = await pool.query(
+          "SELECT 1 FROM notifications WHERE generator_id = ? AND title = ? AND status = 'active' LIMIT 1",
+          [req.params.id, title]
         );
+        if (existing.length === 0) {
+          await pool.query(
+            "INSERT INTO notifications (generator_id,title,detail,status) VALUES (?,?,?,?)",
+            [req.params.id, title, `${label}: ${value} (${status})`, "active"],
+          );
+        }
+      }
     }
     res.status(201).json({ ok: true });
   } catch (e) {

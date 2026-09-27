@@ -25,10 +25,16 @@ const timer = setInterval(async () => {
     
     // Simulate API logic to generate notifications for demo purposes
     if (temperature >= 85) {
-      await c.query("INSERT IGNORE INTO notifications (generator_id,title,detail,status) VALUES (?,?,?,?)", [g_id, "High temperature", `Temperature: ${temperature.toFixed(1)} (warning)`, "active"]);
+      const [existing] = await c.query("SELECT 1 FROM notifications WHERE generator_id = ? AND title = 'High temperature' AND status = 'active' LIMIT 1", [g_id]);
+      if (existing.length === 0) {
+        await c.query("INSERT INTO notifications (generator_id,title,detail,status) VALUES (?,?,?,?)", [g_id, "High temperature", `Temperature: ${temperature.toFixed(1)} (warning)`, "active"]);
+      }
     }
     if (fuel <= 20) {
-      await c.query("INSERT IGNORE INTO notifications (generator_id,title,detail,status) VALUES (?,?,?,?)", [g_id, "Low fuel", `Fuel: ${fuel.toFixed(1)} (warning)`, "active"]);
+      const [existing] = await c.query("SELECT 1 FROM notifications WHERE generator_id = ? AND title = 'Low fuel' AND status = 'active' LIMIT 1", [g_id]);
+      if (existing.length === 0) {
+        await c.query("INSERT INTO notifications (generator_id,title,detail,status) VALUES (?,?,?,?)", [g_id, "Low fuel", `Fuel: ${fuel.toFixed(1)} (warning)`, "active"]);
+      }
     }
   }
   console.log(new Date().toISOString(), "readings written");
