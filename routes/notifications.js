@@ -15,4 +15,13 @@ router.get("/api/notifications", auth, async (req, res) => {
   }
 });
 
+router.post("/api/notifications/resolve-all", auth, async (req, res) => {
+  try {
+    await pool.query("UPDATE notifications SET status = 'resolved' WHERE status = 'active'");
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to resolve notifications." });
+  }
+});
+
 export default router;
