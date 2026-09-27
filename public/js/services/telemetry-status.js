@@ -5,7 +5,7 @@ export function telemetryStatus({ reading, error, hasGenerator }, now = Date.now
   }
   if (!hasGenerator) return { title: "No generator configured", detail: "The database is reachable, but no generator is available. Add a generator before connecting telemetry.", available: false };
   if (!reading) return { title: "No readings received", detail: "The database is connected, but this generator has no readings. Check the device, power supply, and telemetry sender. Its running status is unknown.", available: false };
-  const age = reading.age_seconds !== undefined ? Number(reading.age_seconds) * 1000 : now - new Date(reading.recorded_at).getTime();
+  const age = now - new Date(reading.recorded_at).getTime();
   if (!Number.isFinite(age) || age < -30000) return { title: "Reading timestamp mismatch", detail: "The reading time is invalid or ahead of the database clock. Check the device and database time zones. Current generator status cannot be verified.", available: false };
   if (age >= 30000) return { title: "Readings have stopped updating", detail: "The database is connected, but the latest reading is older than 30 seconds. Check the device connection and telemetry sender. This does not confirm that the generator has stopped.", available: false };
   const status = String(reading.status || "").toLowerCase();
