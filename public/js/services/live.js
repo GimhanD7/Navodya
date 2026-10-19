@@ -65,6 +65,6 @@ export function startLiveUpdates(refresh, render) {
       }
       refresh();
     } finally { busy = false; }
-  }, 1000);
+  }, 3000);
   return () => clearInterval(timer);
 }

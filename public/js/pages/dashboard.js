@@ -50,7 +50,7 @@ export function dashboard() {
   </div>
   <div class="readings-heading">
     <h2 id="readings-title">${simulated ? "Simulated readings" : "Actual readings"}</h2>
-    <div class="timestamp">${icons.info} <span id="timestamp-connection">${connection}</span> · Refreshes every 1 second</div>
+    <div class="timestamp">${icons.info} <span id="timestamp-connection">${connection}</span> · Refreshes every 3 seconds</div>
   </div>
   <div class="readings">
     ${labels.map(([label, key, unit]) => `

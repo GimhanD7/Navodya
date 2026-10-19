@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 120,
+    limit: 1000,
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => req.method === "GET",
@@ -30,7 +30,11 @@ app.use(
 app.use(apiRoutes);
 
 app.get("/favicon.ico", (req, res) => res.status(204).end());
-app.use(express.static(path.join(root, "public")));
+app.use(
+  express.static(path.join(root, "public"), {
+    setHeaders: (res) => res.setHeader("Cache-Control", "no-cache"),
+  }),
+);
 app.use((req, res) => res.sendFile(path.join(root, "public/index.html")));
 app.listen(port, () =>
   console.log(`Generator System listening on http://localhost:${port}`),
