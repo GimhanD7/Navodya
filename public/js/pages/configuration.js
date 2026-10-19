@@ -6,12 +6,6 @@ import { showToast } from "../ui/toasts.js";
 export function config() {
   const cfg = Object.fromEntries(state.config.map((x) => [x.parameter, x]));
   
-  const iconMap = {
-    temperature: "temperature",
-    voltage: "bolt",
-    frequency: "activity",
-    fuel: "droplet"
-  };
 
   const card = (key, label, unit, fields, description) => {
     const c = cfg[key] || {};
@@ -97,6 +91,9 @@ export function bindConfiguration() {
       (form.onsubmit = async (e) => {
         e.preventDefault();
         const message = form.querySelector(".config-message");
+        const button = form.querySelector("button[type=submit]");
+        if (button.disabled) return;
+        button.disabled = true;
         try {
           const body = Object.fromEntries(new FormData(form));
           
@@ -114,7 +111,7 @@ export function bindConfiguration() {
           message.style.color = "var(--text-muted)";
           message.textContent = "Saving...";
 
-          await api("/api/config", {
+          const result = await api("/api/config", {
             method: "PUT",
             body: JSON.stringify({
               parameter: form.dataset.parameter,
@@ -126,15 +123,28 @@ export function bindConfiguration() {
           message.textContent = "Changes Saved Successfully";
           setTimeout(() => { if (message.textContent === "Changes Saved Successfully") message.textContent = ""; }, 3000);
           
-          state.config = (await api("/api/config")).rows;
+          const saved = result.configuration;
+          state.config = [...state.config.filter(row => row.parameter !== saved.parameter), saved];
+          const labels = { temperature: "Temperature", voltage: "Voltage", frequency: "Frequency", fuel: "Fuel" };
+          const units = { temperature: "°C", voltage: "V", frequency: "Hz", fuel: "%" };
+          const values = saved.parameter === "temperature"
+            ? "Warning ≥ " + saved.warning_max + "; critical ≥ " + saved.critical_max
+            : saved.parameter === "fuel"
+              ? "Warning ≤ " + saved.warning_min + "; critical ≤ " + saved.critical_min
+              : "Warning outside " + saved.warning_min + "–" + saved.warning_max + "; critical outside " + saved.critical_min + "–" + saved.critical_max;
+          showToast({
+            title: labels[saved.parameter] + " thresholds saved",
+            detail: values + " " + units[saved.parameter] + ". New readings submitted to the system will use these limits for alerts.",
+            generator_name: "Configuration",
+          });
         } catch (err) {
           message.textContent = "";
           showToast({
-            title: "Validation Error",
+            title: "Configuration not saved",
             detail: err.message || "Failed to save configuration.",
             generator_name: "Configuration"
           });
-        }
+        } finally { button.disabled = false; }
       }),
   );
 }
