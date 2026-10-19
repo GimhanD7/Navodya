@@ -3,7 +3,11 @@ import assert from "node:assert/strict";
 import { telemetryStatus } from "./telemetry-status.js";
 
 test("diagnoses database, missing, stale, clock, and reported operating states separately", () => {
-  const diagnose = (reading, error) => telemetryStatus({ reading, error, hasGenerator: true });
+  const now = Date.parse("2026-10-19T12:00:00Z");
+  const diagnose = (reading, error) => telemetryStatus({
+    reading: reading && { ...reading, recorded_at: new Date(now - reading.age_seconds * 1000).toISOString() },
+    error, hasGenerator: true,
+  }, now);
   assert.equal(diagnose(null, { code: "DATABASE_UNAVAILABLE" }).title, "Database not connected");
   assert.equal(diagnose(null, { code: "TELEMETRY_QUERY_FAILED" }).title, "Unable to read generator data");
   assert.equal(diagnose(null).title, "No readings received");

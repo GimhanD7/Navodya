@@ -1,4 +1,3 @@
-import { loadData } from "./data.js";
 import { updateDemo } from "./demo.js";
 import { api } from "../api.js";
 import { state } from "../state.js";
@@ -36,14 +35,25 @@ export function startLiveUpdates(refresh, render) {
     busy = true;
     const user = state.user;
     const selected = state.selected;
+    const notificationRevision = state.notificationRevision || 0;
     try {
-      if (state.generatorError || !state.selected) { await loadData(); if (state.user === user) refresh(); return; }
-      const [notifications, reading] = await Promise.allSettled([
+      const [notifications, reading, generators] = await Promise.allSettled([
         api("/api/notifications"),
         selected ? api("/api/generators/" + selected + "/latest") : Promise.resolve({ reading: null }),
+        state.generatorError || !selected ? api("/api/generators") : Promise.resolve(null),
       ]);
       if (state.user !== user) return;
-      if (notifications.status === "fulfilled") syncNotifications(notifications.value.rows || [], render);
+      if (generators.status === "fulfilled" && generators.value) {
+        state.generators = generators.value.rows || [];
+        state.generatorError = null;
+        state.selected ??= state.generators[0]?.generator_id;
+      } else if (generators.status === "rejected") state.generatorError = generators.reason;
+      if (!state.notificationBusy && notificationRevision === (state.notificationRevision || 0)) {
+        if (notifications.status === "fulfilled") {
+          state.notificationError = null;
+          syncNotifications(notifications.value.rows || [], render);
+        } else state.notificationError = notifications.reason;
+      }
       if (selected === state.selected) state.telemetryError = reading.status === "rejected" ? reading.reason : null;
       if (selected === state.selected && reading.status === "fulfilled") {
         const newReading = reading.value.reading;

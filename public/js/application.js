@@ -16,7 +16,7 @@ export async function render() {
   document.body.innerHTML = shell();
   $("#content").innerHTML = '<div class="skeleton-message">Loading workspace…</div>';
   if (!state.demo) await loadData();
-  syncNotifications(state.notifications, render);
+  if (!state.notificationError) syncNotifications(state.notifications, render);
   
   const allowed =
     state.user?.role === "admin"
@@ -47,6 +47,7 @@ export function start() {
     .catch(() => login(render));
 
   startLiveUpdates(() => {
+    if (state.notificationBusy && state.route === "notifications") return;
     if (!["dashboard", "maintenance", "notifications"].includes(state.route)) return;
     const content = $("#content");
     if (!content || content.contains(document.activeElement)) return;

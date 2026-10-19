@@ -4,6 +4,24 @@ import { auth } from "../lib/auth.js";
 
 const router = express.Router();
 
+router.post("/api/notifications/:id/resolve", auth, async (req, res) => {
+  if (!/^\d+$/.test(req.params.id)) return res.status(400).json({ error: "Invalid notification." });
+  try {
+    const admin = req.session.user.role === "admin";
+    const [result] = await pool.query(
+      admin
+        ? "UPDATE notifications SET status='resolved' WHERE notification_id=?"
+        : "UPDATE notifications n SET n.status='resolved' WHERE n.notification_id=? AND EXISTS (SELECT 1 FROM generator_users gu WHERE gu.generator_id=n.generator_id AND gu.user_id=?)",
+      admin ? [req.params.id] : [req.params.id, req.session.user.id],
+    );
+    if (!result.affectedRows) return res.status(404).json({ error: "Notification not found or not assigned to you." });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Resolve notification failed", { code: error.code });
+    res.status(503).json({ error: "Unable to resolve notification. Please try again." });
+  }
+});
+
 router.get("/api/notifications", auth, async (req, res) => {
   try {
     let query = "SELECT n.notification_id,n.title,n.detail,n.status,n.created_at,g.name AS generator_name FROM notifications n JOIN generators g ON g.generator_id=n.generator_id ORDER BY n.created_at DESC LIMIT 100";

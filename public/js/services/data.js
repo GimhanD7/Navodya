@@ -22,7 +22,9 @@ export async function loadData() {
       }
     } catch (error) { if (state.user === user) state.generatorError = error; }
   };
-  const requests = [loadGenerators(), api("/api/notifications").then(n => { if (state.user === user) state.notifications = n.rows || []; })];
+  const requests = [loadGenerators(), api("/api/notifications").then(n => {
+    if (state.user === user) { state.notifications = n.rows || []; state.notificationError = null; }
+  }).catch(error => { if (state.user === user) state.notificationError = error; })];
   if (route === "users" && user?.role === "admin") requests.push(api("/api/users").then(d => { if (state.user === user) state.users = d.rows || []; }));
   if (["configuration", "maintenance"].includes(route)) requests.push(api("/api/config").then(d => { if (state.user === user) state.config = d.rows || []; }));
   await Promise.allSettled(requests);
