@@ -8,6 +8,34 @@ import { pages } from "./pages/index.js";
 import { loadData } from "./services/data.js";
 import { startLiveUpdates, syncNotifications } from "./services/live.js";
 
+const titles = {
+  dashboard: "Dashboard",
+  reports: "Reports",
+  users: "Users",
+  generators: "Generators",
+  maintenance: "Maintenance",
+  notifications: "Notifications",
+  configuration: "Configuration",
+};
+
+// Read the page name from the URL path (e.g. /notifications), with #hash fallback.
+function routeFromLocation() {
+  const fromPath = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0];
+  const fromHash = window.location.hash.replace(/^#\/?/, "");
+  const route = fromPath || fromHash || "dashboard";
+  return titles[route] ? route : "dashboard";
+}
+
+// Keep the browser URL in sync with the current page.
+function syncUrl(route, replace) {
+  const target = "/" + route + window.location.search;
+  document.title = `${titles[route] || "Dashboard"} · Generator System`;
+  if (window.location.pathname + window.location.search === target && !window.location.hash) return;
+  window.history[replace ? "replaceState" : "pushState"]({ route }, "", target);
+}
+
+let firstRender = true;
+
 export async function render() {
   if (!state.user) {
     login(render);
@@ -25,9 +53,14 @@ export async function render() {
         ? ["dashboard", "generators", "maintenance", "notifications"]
         : ["dashboard", "maintenance", "notifications"];
 
+  // Initial load and permission redirects replace the history entry; navigation pushes a new one.
+  let replace = firstRender;
+  firstRender = false;
   if (!allowed.includes(state.route)) {
     state.route = "dashboard";
+    replace = true;
   }
+  syncUrl(state.route, replace);
 
   const page = pages[state.route] || pages.dashboard;
   $("#content").innerHTML = page.render();
@@ -36,8 +69,16 @@ export async function render() {
 }
 
 export function start() {
+  // Restore the page from the URL so a refresh stays on the same page.
+  state.route = routeFromLocation();
+  window.addEventListener("popstate", () => {
+    state.route = routeFromLocation();
+    if (state.user) render();
+  });
+
   if (new URLSearchParams(window.location.search).get("demo") === "1") {
     startDemo();
+    state.route = routeFromLocation();
     render();
   } else api("/api/session")
     .then((d) => {

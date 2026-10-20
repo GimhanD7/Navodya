@@ -22,7 +22,7 @@ export function shell() {
     .filter(([r]) => allowed.includes(r))
     .map(
       ([r, l, i]) =>
-        `<a href="#${r}" class="${state.route === r ? "active" : ""}" data-route="${r}">${icons[i]}<span>${l}</span></a>`,
+        `<a href="/${r}" class="${state.route === r ? "active" : ""}" data-route="${r}">${icons[i]}<span>${l}</span></a>`,
     )
     .join(
       "",
